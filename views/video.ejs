@@ -9,29 +9,33 @@
         margin: 0;
         padding: 0;
       }
-      video {
-        height: 100vh;
+      .video-js {
         width: 100%;
-        display: block;
+        min-height: 100vh;
       }
     </style>
+    <link href="https://vjs.zencdn.net/8.3.0/video-js.css" rel="stylesheet" />
   </head>
 
   <body>
-    <video id="videoHLS" autoplay controls></video>
-    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-    <script>
-      if (Hls.isSupported()) {
-        var video = document.getElementById("videoHLS");
-        var hls = new Hls();
-        // bind them together
-        hls.attachMedia(video);
-        //http://localhost:9000/streams/output.m3u8
-        hls.on(Hls.Events.MEDIA_ATTACHED, function () {
-          hls.loadSource("<%= src %>");
-          hls.on(Hls.Events.MANIFEST_PARSED, function (event, data) {});
-        });
-      }
-    </script>
+    <video
+      id="live-stream"
+      class="video-js"
+      controls
+      preload="auto"
+      data-setup="{}"
+      autoplay
+    >
+      <source src="<%= src %>" type="application/x-mpegURL" />
+      <p class="vjs-no-js">
+        To view this video please enable JavaScript, and consider upgrading to a
+        web browser that
+        <a href="https://videojs.com/html5-video-support/" target="_blank"
+          >supports HTML5 video</a
+        >
+      </p>
+    </video>
+
+    <script src="https://vjs.zencdn.net/8.3.0/video.min.js"></script>
   </body>
 </html>

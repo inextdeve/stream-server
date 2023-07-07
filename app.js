@@ -12,14 +12,18 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 dotenv.config();
 
 const app = express();
-
 //Setting Cors
-app.use(cors({ origin: "*", methods: "GET,PUT,POST,DELETE,PATCH" }));
+app.use(cors());
 
 //Setting view engine to ejs
 app.set("view engine", "ejs");
 
 app.use("/camera", camera);
+
+//test response
+app.get("/stream/test", (req, res) => {
+  res.json({ success: true });
+});
 
 const server = app.listen(process.env.PORT);
 
