@@ -3,9 +3,11 @@ import hls from "hls-server";
 import dotenv from "dotenv";
 import cors from "cors";
 import * as fs from "fs";
+import path from "path";
 import { dirname } from "path";
 import { fileURLToPath } from "url";
 import camera from "./api/routes/camera.js";
+import removeSubfolders from "./api/helpers/removeSubDir.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -25,7 +27,11 @@ app.get("/stream/test", (req, res) => {
   res.json({ success: true });
 });
 
-const server = app.listen(process.env.PORT);
+const server = app.listen(process.env.PORT, () => {
+  // Remove all old streams
+  const targetDirectory = path.join(__dirname, "streams"); // Replace 'your-directory-name' with your actual directory
+  removeSubfolders(targetDirectory);
+});
 
 new hls(server, {
   provider: {

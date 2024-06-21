@@ -52,16 +52,25 @@ const stream = async (req, res) => {
 
   //Create ffmpeg Command
   ffmpeg.setFfmpegPath(ffmpegInstaller.path);
-  var command = ffmpeg(address)
-    .addOptions([
-      "-profile:v baseline",
-      "-level 3.0",
-      "-start_number 0",
-      "-hls_list_size 0",
-      "-f hls",
-    ])
+
+  var command = ffmpeg(address, { timeout: 432000 })
+    // set video bitrate
+    .videoBitrate(1024)
+    // set h264 preset
+    // .addOption("preset", "superfast")
+    // set target codec
+    .videoCodec("libx264")
+    // set audio bitrate
+    .audioBitrate("128k")
+    // set audio codec
+    // .audioCodec("libfaac")
+    // set number of audio channels
+    .audioChannels(2)
+    // set hls segments time
+    .addOption("-hls_time", 10)
+    // include all the segments in the list
+    .addOption("-hls_list_size", 0)
     .output(`${__dirname.split("api")[0]}streams/${id}/${analytic}/output.m3u8`)
-    .on("stderr", (stderrLine) => {})
     .on("error", (error) => {
       console.log("Error", error.message);
       res.render(`${__dirname.split("api")[0]}views/error.ejs`, {
@@ -69,20 +78,16 @@ const stream = async (req, res) => {
         cameraName: "Cannot Connect",
       });
     })
-    .on("progress", () => {})
-    .on("data", () => {})
-    .on("codecData", () => {
+    .once("codecData", () => {
       console.log("codec start");
       //Set interval for removing .ts file older than 30s
       setInterval(() => {
         findRemoveSync(
           `${__dirname.split("api")[0]}streams/${id}/${analytic}`,
-          { age: { seconds: 30 }, extensions: ".ts" }
+          { age: { seconds: 60 }, extensions: ".ts" }
         );
       }, 60000);
-
-      // Send response | wait the m3u8 file for created
-      res.render(`${__dirname.split("api")[0]}views/video.ejs`, {
+      return res.render(`${__dirname.split("api")[0]}views/video.ejs`, {
         src: `http://localhost:${process.env.PORT}/streams/${id}/${analytic}/output.m3u8`,
       });
     })
